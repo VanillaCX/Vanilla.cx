@@ -43,14 +43,14 @@ const gateway = (req, res, next) => {
                     requestDomain: (sld + "." + tld),
                     requestService: "api"
                 }
-                services.user_api(req, res, next)
+                return services.user_api(req, res, next)
             } else if(DNS.isServiceHostname(single_sub_domain)) {
                 // USER SERVICE (ie. matter.leesbazaar.com)
                 res.locals.meta = {
                     requestDomain: (sld + "." + tld),
                     requestService: single_sub_domain
                 }
-                services[single_sub_domain](req, res, next)
+                return services[single_sub_domain](req, res, next)
             }
 
 

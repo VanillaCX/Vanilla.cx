@@ -1,3 +1,6 @@
+const express = require('express')
+const router = express.Router()
+
 const {Safe} = require("@VanillaCX/Schema")
 
 const add_params_to_res_locals = (req, res, next, value, key) => {
@@ -12,5 +15,7 @@ const add_params_to_res_locals = (req, res, next, value, key) => {
 
     next()
 }
+
+
 
 module.exports = { add_params_to_res_locals }

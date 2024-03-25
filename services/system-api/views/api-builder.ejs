@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        ul {
+            list-style: none;
+        }
+
+        body {
+            display: grid;
+            grid-template-areas:    "header header"
+                                    "nav services";
+            grid-template-columns: min-content 1fr;    
+        }
+
+        .header {
+            grid-area: header;
+        }
+
+        .navigation {
+            grid-area: nav;
+        }
+
+        .navigation > ul {
+            padding: 0;
+        }
+
+        .navigation a {
+            text-wrap: nowrap;
+        }
+        
+        .services {
+            grid-area: services;
+        }
+        .service {
+        }
+        .service .title {
+        }
+
+        .apiEndPoint {
+            display: grid;
+            margin-bottom: 20px;
+            grid-template-areas:    "endpointHeader endpointHeader"
+                                    "endpointBuild endpointResult";
+            grid-template-columns: 1fr 1fr;
+
+            column-gap: 1em;
+        }
+
+        .apiEndPoint .title{
+            grid-area: endpointTitle;
+        }
+
+        .apiEndPoint .method{
+            font-size: 0.75em;
+            font-weight: 900;
+        }
+
+        .apiEndPoint .method.get{
+            background-color: green;
+            color: white
+        }
+
+        .apiEndPoint .method.post{
+            background-color: blue;
+            color: white
+        }
+
+        .apiEndPoint .description{
+        }
+
+        .apiEndPoint .header{
+            grid-area: endpointHeader;
+
+            display: grid;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .apiEndPoint .build{
+            grid-area: endpointBuild;
+
+            display: grid;
+            display: flex;
+            flex-direction: column;
+
+            row-gap: 0.5em;
+        }
+
+        .apiEndPoint .build .request-body{
+            background-color: turquoise;
+            min-height: 250px
+        }
+
+        .apiEndPoint .build .url{
+            color: grey;
+            font-style: italic;
+        }
+
+        /**.apiEndPoint .build .url span{
+            color: black;
+            font-style: normal;
+            padding: 0.25em;
+            border: 1px solid grey;
+            margin: 0 5px;
+            display: inline-block;
+        }**/
+
+        .apiEndPoint .build .url span{
+            color: black;
+            font-style: normal;
+            display: inline-block;
+            border-bottom: dashed 3px red;
+        }
+
+        .apiEndPoint .build .run{
+        }
+
+        .apiEndPoint .result{
+            grid-area: endpointResult;
+        }
+
+        .apiEndPoint .result .code{
+        }
+
+        .serviceEndPoints {
+            display: flex;
+            flex-direction: column;
+        }
+
+        
+
+        
+    </style>
+</head>
+<body>
+
+    <header class="header">
+        <h1>Vanilla.CX API</h1>
+    </header>
+
+    <nav class="navigation">
+        <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Et, eius! Iusto porro, hic veritatis, ea quia error quis officiis sapiente magnam necessitatibus aspernatur accusamus sunt ipsa repellat perspiciatis dolorem nulla?</p>
+
+        <ul>
+
+            <%
+
+            const makeHashLink = (text) => {
+                return text.toLowerCase().replace(/ /gm, "-")
+            }
+            
+            %>
+            
+                
+            <% services.forEach((service, serviceIndex) => { %>
+                <li>
+                    <a href="#<%= makeHashLink(service.title) %>"><%= makeHashLink(service.title) %></a>
+                
+                <ul>
+                    <% service.endPoints.forEach((endPoint, endPointIndex) => { %>
+                        <li>
+                            <a href="#<%= makeHashLink(endPoint.name) %>"><%= makeHashLink(endPoint.name) %></a>
+                        </li>
+                    <% }) %>
+                </ul>
+                
+                </li>
+            <% }) %>
+        </ul>
+    </nav>
+
+    <ul class="sevices">
+        
+        <% services.forEach((service, serviceIndex) => { %>
+            <li class="service">
+                <a id="<%= makeHashLink(service.title) %>"></a>
+                <h2 class="title"><%= makeHashLink(service.title) %></h2>
+
+                <ul class="serviceEndPoints">
+                    <% service.endPoints.forEach((endPoint, endPointIndex) => { 
+                        const endPointIdentifier = `${serviceIndex}_${endPointIndex}`;
+                        const regexp = /{{([a-zA-Z0-9_]*)}}/g
+                        const matches = [...endPoint.url.matchAll(regexp)]
+                        let url = endPoint.url;
+                        matches.forEach((match) => { 
+                            const span = `<span contenteditable="true">${match[1]}</span>`;
+                            url = url.replace(match[0], span);
+                        })
+
+                        %>
+                        <li class="apiEndPoint">
+                            <div class="header">
+                                <a id="<%= makeHashLink(endPoint.name) %>"></a>
+                                <input type="hidden" id="method_<%= endPointIdentifier %>" value="<%= endPoint.method %>" />
+                                <h3 class="title"><span class="method get"><%= endPoint.method %></span> <%= endPoint.name %></h3>
+                                <p class="description">
+                                    <%= endPoint.description %>
+                                </p>
+                            </div>
+                            <div class="build">
+                                <% if (endPoint.method.toLowerCase() !== "get") { %>
+                                    <textarea class="request-body" id="body_<%= endPointIdentifier %>">
+{
+    "title": {"type": ShortText, "required": true},
+    "subtitle": {"type": ShortText, "required": true},
+    "description": {"type": ShortText, "required": true}
+}
+                                    </textarea>
+                                <% } %>
+                                <div class="url" id="url_<%= endPointIdentifier %>"><%- url %></div>
+                                <button type="button" class="run" data-endPointIdentifier="<%= endPointIdentifier %>">Run</button>
+                            </div>
+                            <div class="result">
+                                <pre class="code" id="response_<%= endPointIdentifier %>">returned from API request</pre>
+                            </div>
+                        </li>
+
+                    <% }) %>
+                </ul>
+
+            </li>
+        <% }) %>
+        
+    </ul>
+    
+    <script>
+        const ShortText = {name: "ShortText"}
+
+        const serialise2 = (json) => {
+            console.log("Serialise JSON: ", json)
+            return JSON.stringify(json, (key, value) => {
+                if (key == "type") {
+                    console.log(value.name)
+                    return value.name
+                } 
+
+                return value
+            })
+        }
+
+        const cleanup = (body) => {
+            body = body.trim()
+            const killNewLines = /\n/gm;
+            body = body.replace(killNewLines, "")
+
+            const findDataTypes = /"type": *([a-zA-Z]*),/gm
+            
+            const dataTypes = [...body.matchAll(findDataTypes)] 
+
+            dataTypes.forEach((dataType) => {
+                body = body.replace(dataType[0], `"type": "${dataType[1]}",`)
+            })
+            console.log("&&&&&&&&:", body)
+
+            return body
+        }
+
+        const test = {
+            title: {type: ShortText, required: true},
+            subtitle: {type: ShortText, required: true},
+            description: {type: ShortText, required: true},
+        }
+
+                                            
+
+        const runButtons = document.getElementsByClassName("run");
+
+        const runApiRequest = ({url, body = null, method, output} = {}) => {
+            console.log(`URL: ${url}`);
+            console.log(`BODY: ${body}`);
+            console.log(`METHOD: ${method}`);
+            console.log(`output: ${output}`);
+
+            output.innerHTML = "Fetching ..."
+
+
+            const headers = new Headers();
+            headers.append("Content-Type", "application/json");
+            headers.append("Accept", "application/json");
+
+            const options = {
+                method,
+                headers,
+                body,
+                mode: "cors",
+                cache: "default",
+            };
+
+            const myRequest = new Request(url, options);
+
+            fetch(myRequest)
+                .then((response) => response.json())
+                .then((json) => {
+                    const prettyJSONString = JSON.stringify(json, null, 4);
+                    output.innerHTML = prettyJSONString
+                    
+                    console.log(prettyJSONString)
+                });
+
+        }
+
+        Array.from(runButtons).forEach((button) => {
+            button.addEventListener("click", (e) => {
+                const url_id = e.target.getAttribute("data-endPointIdentifier")
+                const url = document.getElementById(`url_${url_id}`);
+                const method = document.getElementById(`method_${url_id}`).value;
+                let body = (method.toLowerCase() === "get") ? null : document.getElementById(`body_${url_id}`).value;
+                const output = document.getElementById(`response_${url_id}`);
+                
+                if(body !== null){
+                    console.log("RAW BODY: ", body);
+                    
+                    body = cleanup(body)
+                }
+                
+                runApiRequest({
+                    url: url.innerText,
+                    body,
+                    method,
+                    output
+                });
+            })
+        })
+    </script>
+
+
+    
+        
+    
+</body>
+</html>

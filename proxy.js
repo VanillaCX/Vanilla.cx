@@ -12,7 +12,7 @@ const port = process.env.PORT || 8081;
 const proxy = express()
 
 // Set Helmet usage for security
-proxy.use(helmet());
+//proxy.use(helmet());
 
 // Variables for use in templates
 proxy.locals.dev_machine = dev_machine
@@ -50,6 +50,8 @@ proxy.use((err, req, res, next) => {
 
 // Route traffic to relevant service
 proxy.use(gateway)
+
+// Only Caught if NOT redirected by gateway
 
 // Catch all Router
 proxy.use(catch_all)

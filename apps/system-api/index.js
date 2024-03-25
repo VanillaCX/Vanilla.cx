@@ -1,3 +1,5 @@
+require('dotenv').config({ path: './apps/system-api/.env', override: true })
+
 const express = require('express')
 const app = express()
 
@@ -10,8 +12,8 @@ app.locals.meta = {
 }
 
 app.get("/", (req, res, next) => {
-    console.log(res.locals.meta)
-    res.send("Welcome to the SYSTEM API")
+    console.log("here", res.locals.meta)
+    res.render("home")
 })
 
 app.use("/", catch_all.router)
